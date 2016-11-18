@@ -82,8 +82,10 @@ Address::Address(Ipv4 ip, Port port)
 
 Address
 Address::fromUnix(struct sockaddr* addr) {
+    size_t MaxSize = std::max(INET_ADDRSTRLEN, INET6_ADDRSTRLEN);
+    std::string host(MaxSize, '\0');
     struct sockaddr_in *in_addr = reinterpret_cast<struct sockaddr_in *>(addr);
-    std::string host = TRY_RET(inet_ntoa(in_addr->sin_addr));
+    TRY_RET(inet_ntop(in_addr->sin_family, &in_addr->sin_addr, &host[0], MaxSize) != NULL ? 0 : -1);
 
     int port = in_addr->sin_port;
 
